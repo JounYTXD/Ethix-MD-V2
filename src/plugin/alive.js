@@ -26,19 +26,16 @@ const alive = async (m, Matrix) => {
     image.print(font, x, y, timeString, width, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE);
     const buffer = await image.getBufferAsync(Jimp.MIME_PNG);
     
-    const uptimeMessage = `╭━━━〔 KHAN - Ai 2.0 ⁩〕━━━···▸
-┃╭──────────────···▸
-✧│ *Owner :*  Jawad TechX
-✧│ *User :*  ${m.pushName}
-✧│ *Plugins :* Unlimited 
-✧│ *Mode :* *${mode}*
-✧│ *Platform :* *${os.platform()}*
-✧│ *Prefix : *[- ${pref} -]*  
-✧│ *Uptime :* *${days} Day(s)* ${hours} Hour(s)* ${minutes} Minute(s)* ${seconds} Second(s)*
-✧│ *Version :* ᴠ2..0 Updated
-┃╰──────────────···▸
-╰━━━━━━━━━━━━━━━···▸
-`;
+    const uptimeMessage = `*🤖 KHAN-MD IS AlIVE*
+
+>----------------------->
+
+> *📆 ${days} Day(s)*
+> *🕰️ ${hours} Hour(s)*
+> *⏳ ${minutes} Minute(s)*
+> *⏲️ ${seconds} Second(s)*
+
+>----------------------->`;
     
     const msg = generateWAMessageFromContent(m.from, {
       viewOnceMessage: {
@@ -52,7 +49,7 @@ const alive = async (m, Matrix) => {
               text: uptimeMessage
             }),
             footer: proto.Message.InteractiveMessage.Footer.create({
-              text: "> © Powered BY KHAN MD"
+              text: "© ᴘᴏᴡᴇʀᴅ ʙʏ ᴋʜᴀɴ-ᴍᴅ"
             }),
             header: proto.Message.InteractiveMessage.Header.create({
               ...(await prepareWAMessageMedia({ image: buffer }, { upload: Matrix.waUploadToServer })),
@@ -65,11 +62,7 @@ const alive = async (m, Matrix) => {
               quotedMessage: m.message,
               forwardingScore: 999,
               isForwarded: true,
-              forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363316555500484@newsletter',
-                newsletterName: "KHAN-MD",
-                serverMessageId: 143
-              }
+              // Removed the newsletter information
             }
           }),
         },
