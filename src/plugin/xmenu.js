@@ -1,9 +1,9 @@
 import config from '../../config.cjs';
 
-const ping = async (m, sock) => {
+const test = async (m, sock) => {
   const prefix = config.PREFIX;
-const cmd = m.body.startsWith(prefix) ? m.body.slice(prefix.length).split(' ')[0].toLowerCase() : '';
-const text = m.body.slice(prefix.length + cmd.length).trim();
+  const cmd = m.body.startsWith(prefix) ? m.body.slice(prefix.length).split(' ')[0].toLowerCase() : '';
+  const text = m.body.slice(prefix.length + cmd.length).trim();
 
   if (cmd === "menu") {
     const start = new Date().getTime();
@@ -11,7 +11,7 @@ const text = m.body.slice(prefix.length + cmd.length).trim();
     const end = new Date().getTime();
     const responseTime = (end - start) / 1000;
 
-    const text = `╭━━〔 *KHAN-MD* 〕━━┈⊷
+    const menuText = `╭━━〔 *KHAN-MD* 〕━━┈⊷
 ┃▸╭───────────
 ┃▸┃๏ *Creator* : *JawadTechX
 ┃▸┃๏ *Storage* : *8/132 GB*
@@ -136,8 +136,16 @@ const text = m.body.slice(prefix.length + cmd.length).trim();
 ┃▸└───────────┈⊷
 ╰──────────────┈⊷
 > *Powered By JawadTechX 🇵🇰*`;
-await conn.sendMessage(from,{image:{url: `https://files.catbox.moe/hzagwo.jpg`},caption:dec},{quoted:mek});
+
+    try {
+      await sock.sendMessage(m.from, {
+        image: { url: `https://files.catbox.moe/hzagwo.jpg` },
+        caption: menuText,
+      }, { quoted: m });
+    } catch (error) {
+      console.error("Error sending menu:", error);
+    }
   }
 }
 
-export default ping;
+export default test;
