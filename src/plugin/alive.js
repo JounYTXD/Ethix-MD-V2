@@ -17,13 +17,14 @@ const alive = async (m, Matrix) => {
       const minutes = Math.floor((uptimeSeconds % 3600) / 60);
       const seconds = Math.floor(uptimeSeconds % 60);
 
-      const uptimeMessage = `*KHAN MD V2 IS ONLINE*
-╭❐
-┇ *${days} Day(s)*
-┇ *${hours} Hour(s)*
-┇ *${minutes} Minute(s)*
-┇ *${seconds} Second(s)*
-╰❑`;
+      const uptimeMessage = `*<----🤖 KHAN-MD IS AlIVE---->* 
+
+> *📆 ${days} Day(s)*
+> *🕰️ ${hours} Hour(s)*
+> *⏳ ${minutes} Minute(s)*
+> *⏲️ ${seconds} Second(s)*
+
+ *<--------JawadTechX---------->*`;
 
       const msg = generateWAMessageFromContent(m.from, {
         text: uptimeMessage,
@@ -31,14 +32,16 @@ const alive = async (m, Matrix) => {
 
       console.log("Sending message:", uptimeMessage); // Log the message being sent
 
-      await Matrix.relayMessage(msg.key.remoteJid, msg.message, {
+      const result = await Matrix.relayMessage(msg.key.remoteJid, msg.message, {
         messageId: msg.key.id
       });
 
-      console.log("Message sent successfully"); // Log success
+      console.log("Message sent successfully:", result); // Log success
     } catch (error) {
       console.error("Error in alive function:", error); // Log any errors
     }
+  } else {
+    console.log("Command not recognized."); // Log if the command is not recognized
   }
 };
 
