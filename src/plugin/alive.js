@@ -1,38 +1,30 @@
 import config from '../../config.cjs';
+import pkg from '@whiskeysockets/baileys';
+const { generateWAMessageFromContent } = pkg;
 
-const alive = async (m, sock) => {
-  const prefix = config.PREFIX;
-  const cmd = m.body.startsWith(prefix) ? m.body.slice(prefix.length).split(' ')[0].toLowerCase() : '';
-  const text = m.body.slice(prefix.length + cmd.length).trim();
+const alive = async (m, Matrix) => {
+  const uptimeSeconds = process.uptime();
+  const days = Math.floor(uptimeSeconds / (3600 * 24));
+  const hours = Math.floor((uptimeSeconds % (3600 * 24)) / 3600);
+  const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+  const seconds = Math.floor(uptimeSeconds % 60);
 
-  if (cmd === "alive', 'uptime', 'runtime") {
-    const start = new Date().getTime();
-    await m.React('🐥');
-    const end = new Date().getTime();
-    const responseTime = (end - start) / 1000;
+  const uptimeMessage = `*<----🤖 KHAN-MD IS AlIVE---->* 
 
-    const menuText = `╭━━━〔 KHAN - Ai ⁩〕━━━···▸
-┃╭──────────────···▸
-♡│ *Owner :*  Jawad TechX
-♡│ *User :*  ${m.pushName}
-♡│ *Plugins :* Unlimited 
-♡│ *Mode :* *${mode}*
-♡│ *Platform :* *${os.platform()}*
-♡│ *Prefix : *[- ${pref} -]*  
-♡│ *Uptime :* *${days} Day(s)* ${hours} Hour(s)* ${minutes} Minute(s)* ${seconds} Second(s)*
-┃╰──────────────···▸
-╰━━━━━━━━━━━━━━━···▸
-> *Powered By JawadTechX 🇵🇰*`;
+> *📆 ${days} Day(s)*
+> *🕰️ ${hours} Hour(s)*
+> *⏳ ${minutes} Minute(s)*
+> *⏲️ ${seconds} Second(s)*
 
-    try {
-      await sock.sendMessage(m.from, {
-        image: { url: `https://files.catbox.moe/hzagwo.jpg` },
-        caption: menuText,
-      }, { quoted: m });
-    } catch (error) {
-      console.error("Error sending menu:", error);
-    }
-  }
-}
+ *<--------JawadTechX---------->*`;
+
+  const msg = generateWAMessageFromContent(m.from, {
+    text: uptimeMessage,
+  }, {});
+
+  await Matrix.relayMessage(msg.key.remoteJid, msg.message, {
+    messageId: msg.key.id
+  });
+};
 
 export default alive;
