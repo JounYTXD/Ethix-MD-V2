@@ -26,33 +26,20 @@ const alive = async (m, Matrix) => {
     image.print(font, x, y, timeString, width, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE);
     const buffer = await image.getBufferAsync(Jimp.MIME_PNG);
     
-    const uptimeMessage = `*🤖 ETHIX-MD Status Overview*
-_________________________________________
-
-*📆 ${days} Day(s)*
-*🕰️ ${hours} Hour(s)*
-*⏳ ${minutes} Minute(s)*
-*⏲️ ${seconds} Second(s)*
-_________________________________________
+    const uptimeMessage = `╭━━━〔 KHAN - Ai 2.0 ⁩〕━━━···▸
+┃╭──────────────···▸
+✧│ *Owner :*  Jawad TechX
+✧│ *User :*  ${m.pushName}
+✧│ *Plugins :* Unlimited 
+✧│ *Mode :* *${mode}*
+✧│ *Platform :* *${os.platform()}*
+✧│ *Prefix : *[- ${pref} -]*  
+✧│ *Uptime :* *${days} Day(s)* ${hours} Hour(s)* ${minutes} Minute(s)* ${seconds} Second(s)*
+✧│ *Version :* ᴠ2..0 Updated
+┃╰──────────────···▸
+╰━━━━━━━━━━━━━━━···▸
 `;
     
-    const buttons = [
-      {
-        "name": "quick_reply",
-        "buttonParamsJson": JSON.stringify({
-          display_text: "MENU",
-          id: `${prefix}menu`
-        })
-      },
-      {
-        "name": "quick_reply",
-        "buttonParamsJson": JSON.stringify({
-          display_text: "PING",
-          id: `${prefix}ping`
-        })
-      }
-    ];
-
     const msg = generateWAMessageFromContent(m.from, {
       viewOnceMessage: {
         message: {
@@ -65,7 +52,7 @@ _________________________________________
               text: uptimeMessage
             }),
             footer: proto.Message.InteractiveMessage.Footer.create({
-              text: "© ᴘᴏᴡᴇʀᴅ ʙʏ ᴇᴛʜɪx-ᴍᴅ"
+              text: "> © Powered BY KHAN MD"
             }),
             header: proto.Message.InteractiveMessage.Header.create({
               ...(await prepareWAMessageMedia({ image: buffer }, { upload: Matrix.waUploadToServer })),
@@ -74,16 +61,13 @@ _________________________________________
               subtitle: "",
               hasMediaAttachment: false
             }),
-            nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-              buttons
-            }),
             contextInfo: {
               quotedMessage: m.message,
               forwardingScore: 999,
               isForwarded: true,
               forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363249960769123@newsletter',
-                newsletterName: "Ethix-MD",
+                newsletterJid: '120363316555500484@newsletter',
+                newsletterName: "KHAN-MD",
                 serverMessageId: 143
               }
             }
