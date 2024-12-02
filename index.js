@@ -9,6 +9,7 @@ import {
     useMultiFileAuthState,
 } from '@whiskeysockets/baileys';
 import { Handler, Callupdate, GroupUpdate } from './src/event/index.js';
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('./lib/functions')
 import express from 'express';
 import pino from 'pino';
 import fs from 'fs';
@@ -19,90 +20,64 @@ import moment from 'moment-timezone';
 import axios from 'axios';
 import config from './config.cjs';
 import pkg from './lib/autoreact.cjs';
+const qrcode = require('qrcode-terminal')
+const util = require('util')
+const { sms,downloadMediaMessage } = require('./lib/msg')
+const { File } = require('megajs')
 const { emojis, doReact } = pkg;
 
-const sessionName = "session";
+if (!fs.existsSync(__dirname + '/auth_info_baileys/creds.json')) {
+if(!config.SESSION_ID) return console.log('Please add your session to SESSION_ID env !!')
+const sessdata = config.SESSION_ID
+const filer = File.fromURL(`https://mega.nz/file/${sessdata}`)
+filer.download((err, data) => {
+if(err) throw err
+fs.writeFile(__dirname + '/auth_info_baileys/creds.json', data, () => {
+console.log("Session downloaded ✅")
+})})}
+
+const express = require("express");
 const app = express();
-const orange = chalk.bold.hex("#FFA500");
-const lime = chalk.bold.hex("#32CD32");
-let useQR = false;
-let initialConnection = true;
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 8000;
 
-const MAIN_LOGGER = pino({
-    timestamp: () => `,"time":"${new Date().toJSON()}"`
+//=============================================
+
+async function connectToWA() {
+console.log("Connecting KHANX AI BOT ⏳️...");
+const { state, saveCreds } = await useMultiFileAuthState(__dirname + '/auth_info_baileys/')
+var { version } = await fetchLatestBaileysVersion()
+
+const conn = makeWASocket({
+        logger: P({ level: 'silent' }),
+        printQRInTerminal: false,
+        browser: Browsers.macOS("Firefox"),
+        syncFullHistory: true,
+        auth: state,
+        version
+        })
+    
+conn.ev.on('connection.update', (update) => {
+const { connection, lastDisconnect } = update
+if (connection === 'close') {
+if (lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut) {
+connectToWA()
+}
+} else if (connection === 'open') {
+console.log('🧬 Installing')
+const path = require('path');
+fs.readdirSync("./plugins/").forEach((plugin) => {
+if (path.extname(plugin).toLowerCase() == ".js") {
+require("./plugins/" + plugin);
+}
 });
-const logger = MAIN_LOGGER.child({});
-logger.level = "trace";
+console.log('Plugins installed successful ✅')
+console.log('Bot connected to whatsapp ✅')
 
-const msgRetryCounterCache = new NodeCache();
+let up = `*Hello there KHANX-AI User! \ud83d\udc4b\ud83c\udffb* \n\n> KHANX-Ai is a beta version of KHAN-AI also it provide enhanced functionality to users\n\n *Thanks for using KHANX-AI \ud83c\uddf5\ud83c\uddf0* \n\n> Join WhatsApp Channel :- ⤵️\n \nhttps://whatsapp.com/channel/0029Vaj1hl1Lo4hksSXY0U2t\n\n- *YOUR PREFIX:* = ${prefix}\n\nDont forget to give star to repo ⬇️\n\nhttps://github.com/JawadYTX/KHANX-AI\n\n> Powered By JawadTechX \ud83c\uddf5\ud83c\uddf0`;
 
-const __filename = new URL(import.meta.url).pathname;
-const __dirname = path.dirname(__filename);
-
-const sessionDir = path.join(__dirname, 'session');
-const credsPath = path.join(sessionDir, 'creds.json');
-
-if (!fs.existsSync(sessionDir)) {
-    fs.mkdirSync(sessionDir, { recursive: true });
+conn.sendMessage(conn.user.id, { image: { url: `https://files.catbox.moe/hzagwo.jpg` }, caption: up })
 }
-
-async function downloadSessionData() {
-    if (!config.SESSION_ID) {
-        console.error('Please add your session to SESSION_ID env !!');
-        return false;
-    }
-    const sessdata = config.SESSION_ID.split("Ethix-MD&")[1];
-    const url = `https://pastebin.com/raw/${sessdata}`;
-    try {
-        const response = await axios.get(url);
-        const data = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-        await fs.promises.writeFile(credsPath, data);
-        console.log("🔒 Session Successfully Loaded !!");
-        return true;
-    } catch (error) {
-       // console.error('Failed to download session data:', error);
-        return false;
-    }
-}
-
-async function start() {
-    try {
-        const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
-        const { version, isLatest } = await fetchLatestBaileysVersion();
-        console.log(`🤖 Ethix-MD using WA v${version.join('.')}, isLatest: ${isLatest}`);
-        
-        const Matrix = makeWASocket({
-            version,
-            logger: pino({ level: 'silent' }),
-            printQRInTerminal: useQR,
-            browser: ["Ethix-MD", "safari", "3.3"],
-            auth: state,
-            getMessage: async (key) => {
-                if (store) {
-                    const msg = await store.loadMessage(key.remoteJid, key.id);
-                    return msg.message || undefined;
-                }
-                return { conversation: "Ethix-MD whatsapp user bot" };
-            }
-        });
-
-        Matrix.ev.on('connection.update', (update) => {
-            const { connection, lastDisconnect } = update;
-            if (connection === 'close') {
-                if (lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut) {
-                    start();
-                }
-            } else if (connection === 'open') {
-                if (initialConnection) {
-                    console.log(chalk.green("😃 Integration Successful️ ✅"));
-                    Matrix.sendMessage(Matrix.user.id, { text: `😃 Integration Successful️ ✅` });
-                    initialConnection = false;
-                } else {
-                    console.log(chalk.blue("♻️ Connection reestablished after restart."));
-                }
-            }
-        });
+})
 
         Matrix.ev.on('creds.update', saveCreds);
 
@@ -143,7 +118,7 @@ async function start() {
             await Matrix.readMessages([mek.key]);
             
             if (config.AUTO_STATUS_REPLY) {
-                const customMessage = config.STATUS_READ_MSG || '✅ Auto Status Seen Bot By Ethix-MD-V2';
+                const customMessage = config.STATUS_READ_MSG || '✅ Auto Status Seen Bot By KHAN-MD';
                 await Matrix.sendMessage(fromJid, { text: customMessage }, { quoted: mek });
             }
         }
@@ -184,3 +159,4 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+             
